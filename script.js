@@ -1,16 +1,13 @@
 'use strict';
 
-// ── DOM ──────────────────────────────────────────
 const valEl  = document.getElementById('val');
 const exprEl = document.getElementById('expr');
 
-// ── Calculator State ─────────────────────────────
 let displayValue  = '0';    // what's shown on screen right now
 let firstOperand  = null;   // stored left-hand number
 let operator      = null;   // pending operator string: + - * /
 let waitingForSecond = false; // true after operator pressed
 
-// ── Update Screen ────────────────────────────────
 function updateDisplay() {
   valEl.textContent = displayValue;
 
@@ -21,7 +18,6 @@ function updateDisplay() {
   else if (len > 9) valEl.classList.add('med');
 }
 
-// ── Input a digit or decimal point ───────────────
 function inputDigit(d) {
   if (waitingForSecond) {
     // user started typing the second number
@@ -45,12 +41,10 @@ function inputDigit(d) {
   updateDisplay();
 }
 
-// ── Handle operator (+  −  ×  ÷) ─────────────────
 function handleOperator(op) {
   const current = parseFloat(displayValue);
 
-  // If there's already a pending operator AND user typed a second number,
-  // evaluate the chain first
+
   if (operator && !waitingForSecond) {
     const result = calculate(firstOperand, current, operator);
     if (result === null) { showError('Cannot ÷ by 0'); return; }
@@ -63,11 +57,11 @@ function handleOperator(op) {
   operator         = op;
   waitingForSecond = true;
 
-  // show expression hint
+
   const sym = {'+':'+', '-':'−', '*':'×', '/':'÷'}[op];
   exprEl.textContent = niceNum(firstOperand) + ' ' + sym;
 
-  // highlight active operator button
+
   document.querySelectorAll('.btn.op').forEach(b => b.classList.remove('active'));
   const sym2 = {'+':'+', '-':'−', '*':'×', '/':'÷'}[op];
   document.querySelectorAll('.btn.op').forEach(b => {
@@ -77,7 +71,6 @@ function handleOperator(op) {
   updateDisplay();
 }
 
-// ── Press = ───────────────────────────────────────
 function pressEquals() {
   if (operator === null || firstOperand === null) return;
 
@@ -97,7 +90,7 @@ function pressEquals() {
   updateDisplay();
 }
 
-// ── Pure arithmetic (no state side-effects) ───────
+
 function calculate(a, b, op) {
   switch (op) {
     case '+': return a + b;
@@ -107,7 +100,6 @@ function calculate(a, b, op) {
   }
 }
 
-// ── Format number nicely ──────────────────────────
 function niceNum(n) {
   if (!isFinite(n)) return 'Error';
   // remove floating-point noise (e.g. 0.1+0.2)
@@ -117,7 +109,7 @@ function niceNum(n) {
   return s;
 }
 
-// ── AC / Clear ────────────────────────────────────
+
 function clearAll() {
   displayValue     = '0';
   firstOperand     = null;
@@ -129,7 +121,7 @@ function clearAll() {
   updateDisplay();
 }
 
-// ── Toggle sign ───────────────────────────────────
+
 function toggleSign() {
   if (displayValue === '0' || displayValue === 'Error') return;
   displayValue = displayValue.startsWith('-')
@@ -138,7 +130,6 @@ function toggleSign() {
   updateDisplay();
 }
 
-// ── Percent ───────────────────────────────────────
 function percent() {
   const n = parseFloat(displayValue);
   if (isNaN(n)) return;
@@ -146,7 +137,6 @@ function percent() {
   updateDisplay();
 }
 
-// ── Show error ────────────────────────────────────
 function showError(msg) {
   valEl.className  = 'display-val err';
   valEl.textContent = msg;
@@ -158,7 +148,6 @@ function showError(msg) {
   waitingForSecond = false;
 }
 
-// ── Backspace ─────────────────────────────────────
 function backspace() {
   if (waitingForSecond) return;
   if (displayValue.length <= 1 || displayValue === '-0') {
@@ -170,7 +159,6 @@ function backspace() {
   updateDisplay();
 }
 
-// ── Ripple effect ─────────────────────────────────
 function ripple(btn, e) {
   const sp = document.createElement('span');
   sp.className = 'ripple';
@@ -181,7 +169,7 @@ function ripple(btn, e) {
   sp.addEventListener('animationend', () => sp.remove());
 }
 
-// ── Button click wiring ───────────────────────────
+
 document.getElementById('btn-ac').addEventListener('click',    e => { ripple(e.currentTarget,e); clearAll();    });
 document.getElementById('btn-sign').addEventListener('click',  e => { ripple(e.currentTarget,e); toggleSign();  });
 document.getElementById('btn-pct').addEventListener('click',   e => { ripple(e.currentTarget,e); percent();     });
@@ -201,7 +189,6 @@ document.querySelectorAll('.btn.op').forEach(btn => {
   });
 });
 
-// ── Keyboard support ──────────────────────────────
 document.addEventListener('keydown', e => {
   if (e.key >= '0' && e.key <= '9') { inputDigit(e.key); return; }
   if (e.key === '.')                 { inputDigit('.');   return; }
@@ -215,11 +202,9 @@ document.addEventListener('keydown', e => {
   if (e.key === '%')          { percent();     return; }
 });
 
-// ── Keyboard hint ─────────────────────────────────
 const kbdDiv = document.createElement('div');
 kbdDiv.className = 'kbd';
 kbdDiv.textContent = '⌨  keyboard · ESC = clear · ⌫ = delete';
 document.querySelector('.calculator').appendChild(kbdDiv);
 
-// ── Init ──────────────────────────────────────────
 updateDisplay();
